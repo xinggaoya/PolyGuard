@@ -12,26 +12,25 @@ import (
 **/
 
 type Person struct {
-	ID   int
-	Name string
-	Age  int
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
 }
 
 // Index 测试接口
 func Index(c *gin.Context) {
+	var list []Person
 	person := Person{ID: 123, Name: "Alice123", Age: 45}
-
-	err := db.Set("key1", person)
+	list = append(list, person)
+	err := db.Set("key1", list)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var retrievedPerson Person
+	var retrievedPerson []Person
 	err = db.Get("key1", &retrievedPerson)
 	if err != nil {
 		log.Fatal(err)
 	}
-	c.JSON(200, gin.H{
-		"message": retrievedPerson,
-	})
+	c.HTML(200, "index.html", retrievedPerson[0])
 }

@@ -2,7 +2,6 @@ package app
 
 import (
 	"PolyGuard/router"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -16,8 +15,7 @@ import (
 func Run() {
 
 	r := gin.New()
-	fmt.Println(gin.Version)
-
+	r.LoadHTMLGlob("templates/*")
 	server := &http.Server{
 		Addr:    ":6616",
 		Handler: r,
