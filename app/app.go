@@ -24,6 +24,7 @@ func Run() {
 	}
 
 	router.InitRouter(r)
+	//system.InitScanner()
 
 	err := server.ListenAndServe()
 	if err != nil {

@@ -1,6 +1,9 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"PolyGuard/api"
+	"github.com/gin-gonic/gin"
+)
 
 /**
   @author: XingGao
@@ -9,9 +12,5 @@ import "github.com/gin-gonic/gin"
 
 // InitRouter 初始化路由
 func InitRouter(r *gin.Engine) {
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello, World!",
-		})
-	})
+	r.GET("/", api.Index)
 }
