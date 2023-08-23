@@ -1,8 +1,11 @@
 package system
 
 import (
+	"errors"
 	"fmt"
 	"net"
+	"os/exec"
+	"syscall"
 	"time"
 )
 
@@ -11,29 +14,67 @@ import (
   @date: 2023/8/22
 **/
 
+// ServiceInfo 服务信息
+type ServiceInfo struct {
+	Name    string `json:"name"`
+	Path    string `json:"path"`
+	Port    int    `json:"port"`
+	IsAlive bool   `json:"is_alive"`
+}
+
 // InitScanner 定时扫描端口是否在监听
 func InitScanner() {
 	go func() {
 		for {
-			if isPortListening(6616) {
-				fmt.Println("端口已经在监听")
-			} else {
-				fmt.Println("端口没有在监听")
+			var serviceInfoVis []ServiceInfo
+			serviceInfoVis = append(serviceInfoVis, ServiceInfo{
+				Name:    "测试任务一",
+				Path:    "C://Users/10322/Downloads/demo.java",
+				Port:    8080,
+				IsAlive: false,
+			})
+			for _, serviceInfo := range serviceInfoVis {
+				if isPortInUse(serviceInfo.Port) {
+					serviceInfo.IsAlive = true
+				} else {
+					// 重启服务
+					serviceInfo.IsAlive = false
+					RestartService(serviceInfo)
+				}
 			}
 			time.Sleep(time.Second * 5)
 		}
 	}()
 }
 
-// IsPortListening 检查端口是否在监听
-func isPortListening(port int) bool {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+func isPortInUse(port int) bool {
+	address := fmt.Sprintf(":%d", port)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		return true
+		return true // 端口已被占用
 	}
-	err = listener.Close()
+	listener.Close()
+	return false // 端口未被占用
+}
+
+// RestartService 重启服务
+func RestartService(info ServiceInfo) {
+	fmt.Println("重启服务")
+	// 子进程执行命令
+	cmd := exec.Command("java", "-java", info.Path)
+	err := cmd.Start()
 	if err != nil {
-		return false
+		fmt.Println("cmd.Start: ", err)
 	}
-	return false
+	err = cmd.Wait()
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			// 子进程以非零状态退出
+			status := exitErr.Sys().(syscall.WaitStatus)
+			fmt.Printf("Child process exited with status %d\n", status.ExitStatus())
+		}
+	} else {
+		fmt.Println("Child process exited successfully")
+	}
 }

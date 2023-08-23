@@ -1,4 +1,4 @@
-package consts
+package dbConsts
 
 /**
   @author: XingGao

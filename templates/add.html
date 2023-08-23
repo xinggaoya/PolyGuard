@@ -1,0 +1,92 @@
+<style>
+    /* styles.css */
+
+    /* 输入框样式 */
+    input {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    /* 输入框聚焦时的样式 */
+    input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* 输入框错误时的样式 */
+    input.error {
+        border-color: #dc3545;
+    }
+
+    /* 按钮样式 */
+    button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .primary-button {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .primary-button:hover {
+        background-color: #0056b3;
+    }
+
+    .secondary-button {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .secondary-button:hover {
+        background-color: #555;
+    }
+
+</style>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Service Form</title>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Service Form</h1>
+    <form action="add" method="post">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" name="name">
+        </div>
+        <div class="form-group">
+            <label for="path">Path</label>
+            <input type="text" class="form-control" id="path" name="path">
+        </div>
+        <div class="form-group">
+            <label for="port">Port</label>
+            <input type="number" class="form-control" id="port" name="port">
+        </div>
+<!--        <div class="form-group">-->
+<!--            <label for="isAlive">Is Alive</label>-->
+<!--            <input type="checkbox" class="form-check-input" id="isAlive" name="isAlive">-->
+<!--        </div>-->
+        <div class="form-group">
+            <label for="maxRetries">Max Retries</label>
+            <input type="number" class="form-control" id="maxRetries" name="maxRetries">
+        </div>
+        <div class="form-group">
+            <label for="jvmOptions">JVM Options</label>
+            <input type="text" class="form-control" id="jvmOptions" name="jvmOptions">
+        </div>
+        <button type="submit" class="btn primary-button">Submit</button>
+    </form>
+</div>
+</body>
+</html>

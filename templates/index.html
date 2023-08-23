@@ -1,12 +1,106 @@
+<style>
+    /* styles.css */
+
+    /* 表格样式 */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        border: 1px solid #ddd;
+    }
+
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    /* 按钮样式 */
+    button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .primary-button {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .primary-button:hover {
+        background-color: #0056b3;
+    }
+
+    .secondary-button {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .secondary-button:hover {
+        background-color: #555;
+    }
+
+</style>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Service Monitor</title>
 </head>
 <body>
-<h1>
-    {{ . }}
-</h1>
+<div class="container mt-5">
+    <h1>Service Monitor</h1>
+    <div style="padding: 10px 0;text-align: right">
+        <a href="/add" class="btn btn-primary">Add Service</a>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Path</th>
+            <th>Port</th>
+            <th>Is Alive</th>
+            <th>Max Retries</th>
+            <th>JVM Options</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{range .}}
+        <tr>
+            <td>{{.Name}}</td>
+            <td>{{.Path}}</td>
+            <td>{{.Port}}</td>
+            <td><span class="badge badge-primary">{{.IsAlive}}</span></td>
+            <td>{{.MaxRetries}}</td>
+            <td>{{.JvmOptions}}</td>
+            <td>
+                <button class="btn btn-primary" onclick="editService('{{.Name}}')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteService('{{.Name}}')">Delete</button>
+            </td>
+        </tr>
+        {{end}}
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
+
+<script>
+    function editService(id) {
+        window.location.href = `/update?name=${id}`
+    }
+
+    function deleteService(id) {
+        alert("请确认删除" + id)
+        window.location.href = `/delete?name=${id}`
+    }
+</script>

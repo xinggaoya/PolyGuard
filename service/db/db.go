@@ -1,7 +1,7 @@
 package db
 
 import (
-	"PolyGuard/consts"
+	"PolyGuard/consts/dbConsts"
 	"bytes"
 	"encoding/gob"
 	"fmt"
@@ -18,8 +18,8 @@ type Database struct {
 	db *bolt.DB
 }
 
-func NewDatabase(dbFilePath string) (*Database, error) {
-	var dirPath = consts.DBPath
+func newDatabase(dbFilePath string) (*Database, error) {
+	var dirPath = dbConsts.DBPath
 	// 如果文件夹不存在则创建
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, os.ModePerm)
@@ -40,14 +40,13 @@ func (d *Database) Close() error {
 }
 
 func Set(key string, value interface{}) error {
-
-	d, err := NewDatabase(consts.DBName)
+	d, err := newDatabase(dbConsts.DBName)
 	if err != nil {
 		return err
 	}
 	defer d.Close()
 	return d.db.Update(func(tx *bolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(consts.DBBucketName))
+		bucket, err := tx.CreateBucketIfNotExists([]byte(dbConsts.DBBucketName))
 		if err != nil {
 			return err
 		}
@@ -63,13 +62,13 @@ func Set(key string, value interface{}) error {
 }
 
 func Get(key string, targetValue interface{}) error {
-	d, err := NewDatabase(consts.DBName)
+	d, err := newDatabase(dbConsts.DBName)
 	if err != nil {
 		return err
 	}
 	defer d.Close()
 	return d.db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(consts.DBBucketName))
+		bucket := tx.Bucket([]byte(dbConsts.DBBucketName))
 		if bucket == nil {
 			return fmt.Errorf("bucket not found")
 		}
