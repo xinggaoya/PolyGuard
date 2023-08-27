@@ -58,6 +58,7 @@ func Add(c *gin.Context) {
 	// UUID
 	newUUID := uuid.New()
 	task.Id = newUUID.String()
+	task.IsAutoRun = true
 	var list []java.ServiceInfo
 	err = db.Get(taskConsts.TaskListKey, &list)
 	if err != nil {
@@ -96,7 +97,7 @@ func Update(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	java.StopService(task.Pid)
+	java.StopService(task)
 	go java.RunJar(task)
 	c.Redirect(http.StatusFound, "/")
 }
@@ -134,7 +135,7 @@ func Stop(c *gin.Context) {
 		if v.Id == id {
 			list[i].IsAlive = false
 			list[i].Pid = 0
-			java.StopService(v.Pid)
+			java.StopService(v)
 			break
 		}
 	}

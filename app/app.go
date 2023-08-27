@@ -2,6 +2,7 @@ package app
 
 import (
 	"PolyGuard/router"
+	"PolyGuard/task"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -22,6 +23,8 @@ func Run() {
 	}
 
 	router.InitRouter(r)
+	//system.InitScanner()
+	task.InitTask()
 	err := server.ListenAndServe()
 	if err != nil {
 		fmt.Println(err)

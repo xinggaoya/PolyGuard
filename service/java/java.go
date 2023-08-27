@@ -21,36 +21,51 @@ type ServiceInfo struct {
 	MaxRetries int    `json:"maxRetries" form:"maxRetries"`
 	JvmOptions string `json:"jvmOptions" form:"jvmOptions"`
 	Pid        int    `json:"pid" form:"pid"`
+	IsAutoRun  bool   `json:"isAutoRun" form:"isAutoRun"` // 是否自动启动
 }
 
 // RunJar 执行jar包
 func RunJar(task ServiceInfo) {
+	task.IsAutoRun = true
 	retries := 0
-	for retries < task.MaxRetries {
-		if task.JvmOptions != "" {
-			task.Path = task.Path + " " + task.JvmOptions
+	var list []ServiceInfo
+	err := db.Get(taskConsts.TaskListKey, &list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	taskNew := ServiceInfo{}
+	for _, v := range list {
+		if v.Id == task.Id {
+			taskNew = v
+			break
 		}
-		cmd := exec.Command("java", "-jar", task.Path)
-		err := cmd.Start()
+	}
+
+	for retries < taskNew.MaxRetries && taskNew.IsAutoRun {
+		if taskNew.JvmOptions != "" {
+			taskNew.Path = taskNew.Path + " " + taskNew.JvmOptions
+		}
+		cmd := exec.Command("java", "-jar", taskNew.Path)
+		err = cmd.Start()
 		if err != nil {
-			fmt.Println("启动失败:" + task.Name)
+			fmt.Println("启动失败:" + taskNew.Name)
 		}
 		pid := cmd.Process.Pid
-		fmt.Printf("启动成功: %s, 进程ID: %d\n", task.Name, pid)
-		task.IsAlive = true
-		task.Pid = pid
-		updateServiceStatus(task)
+		fmt.Printf("启动成功: %s, 进程ID: %d\n", taskNew.Name, pid)
+		taskNew.IsAlive = true
+		taskNew.Pid = pid
+		updateServiceStatus(taskNew)
 
 		err = cmd.Wait()
 		if err != nil {
 			retries++
 			fmt.Printf("%s 进程异常关闭，尝试重启，重启次数: %d\n", task.Name, retries)
 			time.Sleep(3 * time.Second) // 等待一段时间再重启
-
 		} else {
 			fmt.Println("进程退出: ", task.Name)
 			task.IsAlive = false
 			task.Pid = 0
+			task.IsAutoRun = true
 			updateServiceStatus(task)
 			break // 子进程成功退出，停止重启
 		}
@@ -65,14 +80,19 @@ func RunJar(task ServiceInfo) {
 }
 
 // StopService 停止jar包
-func StopService(pid int) error {
+func StopService(task ServiceInfo) error {
 	var cmd *exec.Cmd
+
+	// 排除0
+	if task.Pid == 0 {
+		return fmt.Errorf("进程不存在")
+	}
 
 	switch runtime.GOOS {
 	case "windows":
-		cmd = exec.Command("taskkill", "/F", "/PID", strconv.Itoa(pid))
+		cmd = exec.Command("taskkill", "/F", "/T", "/PID", strconv.Itoa(task.Pid))
 	case "darwin", "linux":
-		cmd = exec.Command("kill", "-9", strconv.Itoa(pid))
+		cmd = exec.Command("kill", "-9", strconv.Itoa(task.Pid))
 	default:
 		return fmt.Errorf("不支持的操作系统")
 	}
@@ -90,7 +110,8 @@ func StopService(pid int) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("进程已停止: %d\n", pid)
+	task.IsAutoRun = false
+	updateServiceStatus(task)
 	return nil
 }
 
