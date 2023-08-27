@@ -61,6 +61,10 @@
 <div class="container mt-5">
     <h1>Edit Service</h1>
     <form action="update" method="post">
+        <div class="form-group" style="display: none">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" readonly id="id" name="id" value="{{.Id}}">
+        </div>
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name" name="name" value="{{.Name}}">
@@ -73,10 +77,10 @@
             <label for="port">Port</label>
             <input type="number" class="form-control" id="port" name="port" value="{{.Port}}">
         </div>
-<!--        <div class="form-group">-->
-<!--            <label for="isAlive">Is Alive</label>-->
-<!--            <input type="checkbox" class="form-check-input" id="isAlive" name="isAlive" {{if .IsAlive}}checked{{end}}>-->
-<!--        </div>-->
+        <!--        <div class="form-group">-->
+        <!--            <label for="isAlive">Is Alive</label>-->
+        <!--            <input type="checkbox" class="form-check-input" id="isAlive" name="isAlive" {{if .IsAlive}}checked{{end}}>-->
+        <!--        </div>-->
         <div class="form-group">
             <label for="maxRetries">Max Retries</label>
             <input type="number" class="form-control" id="maxRetries" name="maxRetries" value="{{.MaxRetries}}">

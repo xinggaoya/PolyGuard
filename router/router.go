@@ -22,8 +22,10 @@ func InitRouter(r *gin.Engine) {
 	r.POST("/add", api.Add)
 	// 修改任务
 	r.POST("/update", api.Update)
+	// 启动任务
+	r.GET("/start", api.Start)
+	// 停止任务
+	r.GET("/stop", api.Stop)
 	// 删除任务
 	r.GET("/delete", api.Delete)
-	// ping
-	r.GET("/ping", api.Ping)
 }

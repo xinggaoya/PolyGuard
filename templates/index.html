@@ -64,6 +64,7 @@
     <table class="table table-bordered">
         <thead>
         <tr>
+            <th>Id</th>
             <th>Name</th>
             <th>Path</th>
             <th>Port</th>
@@ -76,6 +77,7 @@
         <tbody>
         {{range .}}
         <tr>
+            <td>{{.Id}}</td>
             <td>{{.Name}}</td>
             <td>{{.Path}}</td>
             <td>{{.Port}}</td>
@@ -83,8 +85,10 @@
             <td>{{.MaxRetries}}</td>
             <td>{{.JvmOptions}}</td>
             <td>
-                <button class="btn btn-primary" onclick="editService('{{.Name}}')">Edit</button>
-                <button class="btn btn-danger" onclick="deleteService('{{.Name}}')">Delete</button>
+                <button class="btn btn-primary" onclick="startService('{{.Id}}')">start</button>
+                <button class="btn btn-primary" onclick="stopService('{{.Id}}')">stop</button>
+                <button class="btn btn-primary" onclick="editService('{{.Id}}')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteService('{{.Id}}')">Delete</button>
             </td>
         </tr>
         {{end}}
@@ -96,11 +100,21 @@
 
 <script>
     function editService(id) {
-        window.location.href = `/update?name=${id}`
+        window.location.href = `/update?id=${id}`
     }
 
     function deleteService(id) {
         alert("请确认删除" + id)
-        window.location.href = `/delete?name=${id}`
+        window.location.href = `/delete?id=${id}`
+    }
+    // 启动服务
+    function startService(id) {
+        alert("请确认启动" + id)
+        window.location.href = `/start?id=${id}`
+    }
+    // 停止服务
+    function stopService(id) {
+        alert("请确认停止" + id)
+        window.location.href = `/stop?id=${id}`
     }
 </script>

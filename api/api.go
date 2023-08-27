@@ -4,9 +4,9 @@ import (
 	"PolyGuard/consts/taskConsts"
 	"PolyGuard/service/db"
 	"PolyGuard/service/java"
-	task2 "PolyGuard/task"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -32,7 +32,7 @@ func AddPage(c *gin.Context) {
 
 // UpdatePage 修改任务页面
 func UpdatePage(c *gin.Context) {
-	var name = c.Query("name")
+	var id = c.Query("id")
 	var list []java.ServiceInfo
 	err := db.Get(taskConsts.TaskListKey, &list)
 	if err != nil {
@@ -40,7 +40,7 @@ func UpdatePage(c *gin.Context) {
 	}
 	var task java.ServiceInfo
 	for _, v := range list {
-		if v.Name == name {
+		if v.Id == id {
 			task = v
 			break
 		}
@@ -55,6 +55,9 @@ func Add(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	// UUID
+	newUUID := uuid.New()
+	task.Id = newUUID.String()
 	var list []java.ServiceInfo
 	err = db.Get(taskConsts.TaskListKey, &list)
 	if err != nil {
@@ -65,7 +68,7 @@ func Add(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	task2.InitTask()
+	go java.RunJar(task)
 	// 重定向
 	c.Redirect(http.StatusFound, "/")
 }
@@ -84,7 +87,7 @@ func Update(c *gin.Context) {
 		fmt.Println(err)
 	}
 	for i, v := range list {
-		if v.Name == task.Name {
+		if v.Id == task.Id {
 			list[i] = task
 			break
 		}
@@ -93,20 +96,65 @@ func Update(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	task2.InitTask()
+	java.StopService(task.Pid)
+	go java.RunJar(task)
 	c.Redirect(http.StatusFound, "/")
 }
 
-// Delete 删除任务
-func Delete(c *gin.Context) {
-	name := c.Query("name")
+// Start 启动任务
+func Start(c *gin.Context) {
+	id := c.Query("id")
 	var list []java.ServiceInfo
 	err := db.Get(taskConsts.TaskListKey, &list)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for i, v := range list {
-		if v.Name == name {
+		if v.Id == id {
+			go java.RunJar(list[i])
+			break
+		}
+	}
+	err = db.Set(taskConsts.TaskListKey, list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	c.Redirect(http.StatusFound, "/")
+}
+
+// Stop 停止任务
+func Stop(c *gin.Context) {
+	id := c.Query("id")
+	var list []java.ServiceInfo
+	err := db.Get(taskConsts.TaskListKey, &list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for i, v := range list {
+		if v.Id == id {
+			list[i].IsAlive = false
+			list[i].Pid = 0
+			java.StopService(v.Pid)
+			break
+		}
+	}
+	err = db.Set(taskConsts.TaskListKey, list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	c.Redirect(http.StatusFound, "/")
+}
+
+// Delete 删除任务
+func Delete(c *gin.Context) {
+	id := c.Query("id")
+	var list []java.ServiceInfo
+	err := db.Get(taskConsts.TaskListKey, &list)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for i, v := range list {
+		if v.Id == id {
 			list = append(list[:i], list[i+1:]...)
 			break
 		}
@@ -116,17 +164,4 @@ func Delete(c *gin.Context) {
 		fmt.Println(err)
 	}
 	c.Redirect(http.StatusFound, "/")
-}
-
-// Ping 测试接口
-func Ping(c *gin.Context) {
-	var taskList []java.ServiceInfo
-	serviceInfos := append(taskList, java.ServiceInfo{Name: "测试", Path: "C://Users/10322/Downloads/demo.jar", Port: 8080, IsAlive: false})
-	err := db.Set("task", serviceInfos)
-	if err != nil {
-		return
-	}
-	c.JSON(200, gin.H{
-		"code": 200,
-	})
 }
